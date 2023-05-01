@@ -4,25 +4,38 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+
+- main
+
 
 pool:
-  vmImage: ubuntu-latest
+
+  vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- checkout: self
+  persistCredentials: true
+  lean: true
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
-- script:  git clone --mirror $(https://github.com/ResmiADevi/AWS-PROJECT.git) temp-repo
-    cd temp-repo
-    git remote add azure $(https://dev.azure.com/financial-application/fmt-web/_git/myrepository)
-    git push --mirror azure
-  displayName: 'Migrate repository to Azure Repos'
+- script
+   git remote add gitlab https://gitlab.com/leonardo247Project/rn_azure_test.git
 
-- script: 
-   rm -rf temp-repo  
-  displayName: "cleanup"
+    git fetch --no-tags --prune --progress --no-recurse-submodules origin +refs/heads/*:refs/remotes/gitlab/*
+
+    git checkout -b import-gitlab
+
+    git commit --allow-empty -m "Add empty commit"
+
+    git merge --no-edit --allow-unrelated-histories --strategy-option=theirs remotes/gitlab/master
+
+    git push origin import-gitlab:master
+
+  env:
+
+    GIT_ASKPASS: /usr/bin/true
+
+    GIT_HTTP_USERNAME: $(GITLAB_TOKEN)
+
+    GIT_HTTP_PASSWORD: x-oauth-basic
+
+  displayName: 'Import GitLab repository'
